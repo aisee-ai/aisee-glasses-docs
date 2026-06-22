@@ -93,10 +93,14 @@
   </div>
 
   <script>
-    var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
-    // Google's AccountChooser only accepts a Google `continue` URL, so we send it
-    // to the exec URL with ?home=1; the Apps Script then redirects top-level back
-    // to docs.glass.aisee.ai (so the address bar is restored after switching).
+    // DOMAIN-QUALIFIED exec URL (/a/macros/aisee.ai/...). The generic /macros/s/
+    // form always uses the browser's DEFAULT Google account, so multi-login users
+    // whose default isn't aisee would load a blocked account and loop. The
+    // /a/macros/aisee.ai/ form forces the aisee.ai account even when it's a
+    // secondary login.
+    var APP_URL = "https://script.google.com/a/macros/aisee.ai/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
+    // AccountChooser only accepts a Google `continue` URL; send it to the exec
+    // with ?home=1, which redirects (one click) back to docs.glass.aisee.ai.
     var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL + "?home=1");
     document.getElementById("switchLink").href = chooser;
 
