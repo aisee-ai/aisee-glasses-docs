@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AiSee Glasses — SDK Documentation</title>
+  <meta name="description" content="Developer documentation for the AiSee Glasses SDK. Team access only (aisee.ai).">
+  <meta name="theme-color" content="#262238">
+
+  <!-- Rich link preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="AiSee Glasses — SDK Documentation">
+  <meta property="og:description" content="Developer documentation for the AiSee Glasses SDK. Team access only (aisee.ai).">
+  <meta property="og:url" content="https://docs.glass.aisee.ai/">
+  <meta name="twitter:card" content="summary">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=chillax@1&display=swap" rel="stylesheet">
+  <style>
+    :root { --ink:#262238; --purple:#7A6BB5; --violet:#c4b5fd; --bar-h:46px;
+      --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      --display:"Chillax","DM Sans",system-ui,sans-serif; }
+    * { box-sizing:border-box; }
+    html,body { height:100%; margin:0; }
+    body { font-family:var(--sans); background:var(--ink); color:#fff;
+      display:flex; flex-direction:column; }
+    header { height:var(--bar-h); flex:0 0 var(--bar-h); display:flex; align-items:center;
+      gap:12px; padding:0 16px; background:var(--ink); border-bottom:1px solid rgba(255,255,255,.08); }
+    header .brand { font-family:var(--display); font-weight:600; letter-spacing:.04em;
+      text-transform:uppercase; font-size:.72rem; color:var(--violet); }
+    header .title { font-weight:600; font-size:.9rem; }
+    header .spacer { flex:1; }
+    header a.open { color:#fff; text-decoration:none; font-size:.82rem; font-weight:600;
+      background:var(--purple); padding:6px 14px; border-radius:999px; }
+    header a.open:hover { filter:brightness(1.08); }
+    .frame-wrap { position:relative; flex:1; min-height:0; background:#FAFAFA; }
+    iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    /* Fallback shown underneath the iframe — visible only if the embed is blocked
+       (e.g. the visitor is not signed in, so Google's login can't be framed). */
+    .fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+      text-align:center; padding:24px; background:var(--ink); }
+    .fallback .card { max-width:460px; }
+    .fallback .brand { font-family:var(--display); text-transform:uppercase; letter-spacing:.06em;
+      font-size:.78rem; color:var(--violet); margin-bottom:12px; }
+    .fallback h1 { font-family:var(--display); font-weight:600; font-size:1.6rem; margin:0 0 12px; }
+    .fallback p { color:rgba(255,255,255,.78); line-height:1.6; margin:0 0 18px; }
+    .fallback a { display:inline-block; background:var(--purple); color:#fff; text-decoration:none;
+      font-weight:600; padding:12px 24px; border-radius:999px; }
+    .fallback .hint { font-size:.8rem; color:rgba(255,255,255,.5); margin-top:16px; }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="brand">AiSee Glasses</span>
+    <span class="title">SDK Documentation</span>
+    <span class="spacer"></span>
+    <a class="open" id="openLink" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+  </header>
+  <div class="frame-wrap">
+    <div class="fallback">
+      <div class="card">
+        <div class="brand">AiSee Glasses</div>
+        <h1>SDK Documentation</h1>
+        <p>This documentation is for the AiSee glasses team. Sign in with your
+           <strong>aisee.ai</strong> Google account to view it.</p>
+        <a id="fallbackLink" href="#" target="_blank" rel="noopener">Open documentation →</a>
+        <p class="hint">Loading the embedded view… if nothing appears, use the button above.</p>
+      </div>
+    </div>
+    <iframe id="docs" title="AiSee Glasses SDK Documentation"
+      referrerpolicy="no-referrer-when-downgrade"
+      allow="clipboard-write"></iframe>
+  </div>
+
+  <script>
+    // The gated Apps Script web app (execute-as-owner, aisee.ai domain).
+    var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
+    document.getElementById("openLink").href = APP_URL;
+    document.getElementById("fallbackLink").href = APP_URL;
+    var f = document.getElementById("docs");
+    // Load the embed last so the fallback paints first.
+    f.src = APP_URL;
+  </script>
+</body>
+</html>
