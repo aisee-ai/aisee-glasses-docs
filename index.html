@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>AiSee Glasses — SDK Documentation</title>
   <meta name="description" content="Developer documentation for the AiSee Glasses SDK. Team access only (aisee.ai).">
   <meta name="theme-color" content="#262238">
@@ -91,7 +94,11 @@
 
   <script>
     var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
-    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL);
+    // Return to THIS wrapper after switching accounts (not the long exec URL), so
+    // the address bar stays docs.glass.aisee.ai and a still-blocked re-pick lands
+    // back on our branded overlay instead of Google's raw error.
+    var here = location.origin + location.pathname;
+    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(here);
     document.getElementById("switchLink").href = chooser;
 
     var overlay = document.getElementById("overlay");
