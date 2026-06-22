@@ -65,7 +65,6 @@
     <span class="brand">AiSee Glasses</span>
     <span class="title">SDK Documentation</span>
     <span class="spacer"></span>
-    <a class="open" id="openLink" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
   </header>
   <div class="frame-wrap">
     <iframe id="docs" title="AiSee Glasses SDK Documentation"
@@ -84,9 +83,7 @@
              <strong>aisee.ai</strong> Google account to continue.</p>
           <div class="actions">
             <a class="btn primary" id="switchLink" href="#" target="_top">Choose a different Google account</a>
-            <a class="btn ghost" id="openLink2" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
           </div>
-          <p class="hint">Need access? Ask the glasses team to add your address to the allowlist.</p>
         </div>
       </div>
     </div>
@@ -95,8 +92,6 @@
   <script>
     var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
     var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL);
-    document.getElementById("openLink").href = APP_URL;
-    document.getElementById("openLink2").href = APP_URL;
     document.getElementById("switchLink").href = chooser;
 
     var overlay = document.getElementById("overlay");
