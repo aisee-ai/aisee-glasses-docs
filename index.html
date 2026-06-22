@@ -94,11 +94,10 @@
 
   <script>
     var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
-    // Return to THIS wrapper after switching accounts (not the long exec URL), so
-    // the address bar stays docs.glass.aisee.ai and a still-blocked re-pick lands
-    // back on our branded overlay instead of Google's raw error.
-    var here = location.origin + location.pathname;
-    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(here);
+    // Google's AccountChooser only accepts a Google `continue` URL, so we send it
+    // to the exec URL with ?home=1; the Apps Script then redirects top-level back
+    // to docs.glass.aisee.ai (so the address bar is restored after switching).
+    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL + "?home=1");
     document.getElementById("switchLink").href = chooser;
 
     var overlay = document.getElementById("overlay");
