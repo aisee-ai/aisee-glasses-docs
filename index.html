@@ -99,9 +99,12 @@
     // /a/macros/aisee.ai/ form forces the aisee.ai account even when it's a
     // secondary login.
     var APP_URL = "https://script.google.com/a/macros/aisee.ai/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
-    // AccountChooser only accepts a Google `continue` URL; send it to the exec
-    // with ?home=1, which redirects (one click) back to docs.glass.aisee.ai.
-    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL + "?home=1");
+    // For the account chooser's `continue`, use the GENERIC exec URL. The chooser
+    // prepends /a/<domain>/ itself when a Workspace account is picked; passing the
+    // already domain-qualified URL doubles it (/a/aisee.ai/a/macros/aisee.ai/…) and
+    // 404s. The chooser also appends the right authuser for the picked account.
+    var EXEC_GENERIC = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
+    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(EXEC_GENERIC + "?home=1");
     document.getElementById("switchLink").href = chooser;
 
     var overlay = document.getElementById("overlay");
