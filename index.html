@@ -6,14 +6,11 @@
   <title>AiSee Glasses — SDK Documentation</title>
   <meta name="description" content="Developer documentation for the AiSee Glasses SDK. Team access only (aisee.ai).">
   <meta name="theme-color" content="#262238">
-
-  <!-- Rich link preview -->
   <meta property="og:type" content="website">
   <meta property="og:title" content="AiSee Glasses — SDK Documentation">
   <meta property="og:description" content="Developer documentation for the AiSee Glasses SDK. Team access only (aisee.ai).">
   <meta property="og:url" content="https://docs.glass.aisee.ai/">
   <meta name="twitter:card" content="summary">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,10 +21,9 @@
       --display:"Chillax","DM Sans",system-ui,sans-serif; }
     * { box-sizing:border-box; }
     html,body { height:100%; margin:0; }
-    body { font-family:var(--sans); background:var(--ink); color:#fff;
-      display:flex; flex-direction:column; }
-    header { height:var(--bar-h); flex:0 0 var(--bar-h); display:flex; align-items:center;
-      gap:12px; padding:0 16px; background:var(--ink); border-bottom:1px solid rgba(255,255,255,.08); }
+    body { font-family:var(--sans); background:var(--ink); color:#fff; display:flex; flex-direction:column; }
+    header { height:var(--bar-h); flex:0 0 var(--bar-h); display:flex; align-items:center; gap:12px;
+      padding:0 16px; background:var(--ink); border-bottom:1px solid rgba(255,255,255,.08); z-index:3; }
     header .brand { font-family:var(--display); font-weight:600; letter-spacing:.04em;
       text-transform:uppercase; font-size:.72rem; color:var(--violet); }
     header .title { font-weight:600; font-size:.9rem; }
@@ -37,18 +33,31 @@
     header a.open:hover { filter:brightness(1.08); }
     .frame-wrap { position:relative; flex:1; min-height:0; background:#FAFAFA; }
     iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
-    /* Fallback shown underneath the iframe — visible only if the embed is blocked
-       (e.g. the visitor is not signed in, so Google's login can't be framed). */
-    .fallback { position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-      text-align:center; padding:24px; background:var(--ink); }
-    .fallback .card { max-width:460px; }
-    .fallback .brand { font-family:var(--display); text-transform:uppercase; letter-spacing:.06em;
+
+    /* Branded overlay shown by default; removed only when the embedded app
+       signals it loaded. If the visitor is blocked (Google returns its generic
+       error in the iframe), no signal arrives and this stays — so they see our
+       UI with an account switcher, not Google's error. */
+    .overlay { position:absolute; inset:0; z-index:2; display:flex; align-items:center;
+      justify-content:center; text-align:center; padding:24px; background:var(--ink); }
+    .overlay.hidden { display:none; }
+    .overlay .card { max-width:480px; }
+    .overlay .brand { font-family:var(--display); text-transform:uppercase; letter-spacing:.06em;
       font-size:.78rem; color:var(--violet); margin-bottom:12px; }
-    .fallback h1 { font-family:var(--display); font-weight:600; font-size:1.6rem; margin:0 0 12px; }
-    .fallback p { color:rgba(255,255,255,.78); line-height:1.6; margin:0 0 18px; }
-    .fallback a { display:inline-block; background:var(--purple); color:#fff; text-decoration:none;
-      font-weight:600; padding:12px 24px; border-radius:999px; }
-    .fallback .hint { font-size:.8rem; color:rgba(255,255,255,.5); margin-top:16px; }
+    .overlay h1 { font-family:var(--display); font-weight:600; font-size:1.7rem; margin:0 0 12px; }
+    .overlay p { color:rgba(255,255,255,.8); line-height:1.6; margin:0 0 8px; }
+    .spinner { width:26px; height:26px; margin:6px auto 16px; border:3px solid rgba(255,255,255,.25);
+      border-top-color:var(--violet); border-radius:50%; animation:spin .9s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    .actions { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .btn { display:inline-block; text-decoration:none; font-weight:600; padding:11px 20px; border-radius:999px; }
+    .btn.primary { background:var(--purple); color:#fff; }
+    .btn.primary:hover { filter:brightness(1.08); }
+    .btn.ghost { background:rgba(255,255,255,.1); color:#fff; }
+    .btn.ghost:hover { background:rgba(255,255,255,.16); }
+    .reveal { opacity:0; transition:opacity .3s; }
+    .reveal.show { opacity:1; }
+    .hint { font-size:.8rem; color:rgba(255,255,255,.5); margin-top:16px; }
   </style>
 </head>
 <body>
@@ -59,29 +68,59 @@
     <a class="open" id="openLink" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
   </header>
   <div class="frame-wrap">
-    <div class="fallback">
+    <iframe id="docs" title="AiSee Glasses SDK Documentation"
+      referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
+
+    <div class="overlay" id="overlay">
       <div class="card">
         <div class="brand">AiSee Glasses</div>
-        <h1>SDK Documentation</h1>
-        <p>This documentation is for the AiSee glasses team. Sign in with your
-           <strong>aisee.ai</strong> Google account to view it.</p>
-        <a id="fallbackLink" href="#" target="_blank" rel="noopener">Open documentation →</a>
-        <p class="hint">Loading the embedded view… if nothing appears, use the button above.</p>
+        <div id="loading">
+          <div class="spinner"></div>
+          <p>Loading the documentation…</p>
+        </div>
+        <div class="reveal" id="blocked">
+          <h1>This documentation is team-only</h1>
+          <p>Access is limited to the AiSee glasses team. Sign in with your
+             <strong>aisee.ai</strong> Google account to continue.</p>
+          <div class="actions">
+            <a class="btn primary" id="switchLink" href="#" target="_top">Choose a different Google account</a>
+            <a class="btn ghost" id="openLink2" href="#" target="_blank" rel="noopener">Open in new tab ↗</a>
+          </div>
+          <p class="hint">Need access? Ask the glasses team to add your address to the allowlist.</p>
+        </div>
       </div>
     </div>
-    <iframe id="docs" title="AiSee Glasses SDK Documentation"
-      referrerpolicy="no-referrer-when-downgrade"
-      allow="clipboard-write"></iframe>
   </div>
 
   <script>
-    // The gated Apps Script web app (execute-as-owner, aisee.ai domain).
     var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
+    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL);
     document.getElementById("openLink").href = APP_URL;
-    document.getElementById("fallbackLink").href = APP_URL;
-    var f = document.getElementById("docs");
-    // Load the embed last so the fallback paints first.
-    f.src = APP_URL;
+    document.getElementById("openLink2").href = APP_URL;
+    document.getElementById("switchLink").href = chooser;
+
+    var overlay = document.getElementById("overlay");
+    var loaded = false;
+
+    // The embedded app (Portal/Denied) posts this when it renders.
+    window.addEventListener("message", function (e) {
+      if (e.data === "aisee-docs-ready" && /google/.test(e.origin || "")) {
+        loaded = true;
+        overlay.classList.add("hidden");
+      }
+    });
+
+    // If no "ready" signal soon, the visitor is blocked by Google → swap the
+    // spinner for our team-only / switch-account UI (overlay already covers the
+    // iframe's generic error).
+    setTimeout(function () {
+      if (loaded) return;
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("blocked").classList.add("show");
+    }, 4000);
+
+    // Load the embed last.
+    document.getElementById("docs").src = APP_URL;
   </script>
 </body>
 </html>
