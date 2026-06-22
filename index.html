@@ -98,13 +98,16 @@
     // whose default isn't aisee would load a blocked account and loop. The
     // /a/macros/aisee.ai/ form forces the aisee.ai account even when it's a
     // secondary login.
-    var APP_URL = "https://script.google.com/a/macros/aisee.ai/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
-    // For the account chooser's `continue`, use the GENERIC exec URL. The chooser
-    // prepends /a/<domain>/ itself when a Workspace account is picked; passing the
-    // already domain-qualified URL doubles it (/a/aisee.ai/a/macros/aisee.ai/…) and
-    // 404s. The chooser also appends the right authuser for the picked account.
-    var EXEC_GENERIC = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
-    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(EXEC_GENERIC + "?home=1");
+    // GENERIC exec URL — it runs as the visitor's ACTIVE Google account, so a
+    // non-team account (e.g. a personal Gmail) is correctly blocked. (The
+    // domain-qualified /a/macros/aisee.ai/ form would force the aisee account even
+    // when the visitor picked a different one — wrong for gating.)
+    var APP_URL = "https://script.google.com/macros/s/AKfycbxMAiX2OgzXUY9d06GdgSjLSRfAovwsN_UyM-WLAahcXOtnQFOV4vMv-O_nGhPsHlSI/exec";
+    // Carry the chosen account's authuser (set by the switch flow) so the embed
+    // loads the account the user actually picked, not just authuser=0.
+    var au = new URLSearchParams(location.search).get("authuser");
+    var iframeSrc = APP_URL + (au ? ("?authuser=" + encodeURIComponent(au)) : "");
+    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL + "?home=1");
     document.getElementById("switchLink").href = chooser;
 
     var overlay = document.getElementById("overlay");
@@ -128,7 +131,7 @@
     }, 4000);
 
     // Load the embed last.
-    document.getElementById("docs").src = APP_URL;
+    document.getElementById("docs").src = iframeSrc;
   </script>
 </body>
 </html>
