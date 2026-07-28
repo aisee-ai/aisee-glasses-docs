@@ -19,21 +19,14 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=chillax@1&display=swap" rel="stylesheet">
   <style>
-    :root { --ink:#262238; --purple:#7A6BB5; --violet:#c4b5fd; --bar-h:46px;
+    :root { --ink:#262238; --purple:#7A6BB5; --violet:#c4b5fd;
       --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
       --display:"Chillax","DM Sans",system-ui,sans-serif; }
     * { box-sizing:border-box; }
     html,body { height:100%; margin:0; }
     body { font-family:var(--sans); background:var(--ink); color:#fff; display:flex; flex-direction:column; }
-    header { height:var(--bar-h); flex:0 0 var(--bar-h); display:flex; align-items:center; gap:12px;
-      padding:0 16px; background:var(--ink); border-bottom:1px solid rgba(255,255,255,.08); z-index:3; }
-    header .brand { font-family:var(--display); font-weight:600; letter-spacing:.04em;
-      text-transform:uppercase; font-size:.72rem; color:var(--violet); }
-    header .title { font-weight:600; font-size:.9rem; }
-    header .spacer { flex:1; }
-    header a.open { color:#fff; text-decoration:none; font-size:.82rem; font-weight:600;
-      background:var(--purple); padding:6px 14px; border-radius:999px; }
-    header a.open:hover { filter:brightness(1.08); }
+    /* No wrapper chrome: the embedded portal renders the single app bar
+       (brand + nav + account menu), so this page is just the full-bleed frame. */
     .frame-wrap { position:relative; flex:1; min-height:0; background:#FAFAFA; }
     iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
 
@@ -64,11 +57,6 @@
   </style>
 </head>
 <body>
-  <header>
-    <span class="brand">AiSee Glasses</span>
-    <span class="title">SDK Documentation</span>
-    <span class="spacer"></span>
-  </header>
   <div class="frame-wrap">
     <iframe id="docs" title="AiSee Glasses SDK Documentation"
       referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
