@@ -81,21 +81,23 @@
   </div>
 
   <script>
-    // DOMAIN-QUALIFIED exec URL (/a/macros/aisee.ai/...). The generic /macros/s/
-    // form always uses the browser's DEFAULT Google account, so multi-login users
-    // whose default isn't aisee would load a blocked account and loop. The
-    // /a/macros/aisee.ai/ form forces the aisee.ai account even when it's a
-    // secondary login.
-    // GENERIC exec URL — it runs as the visitor's ACTIVE Google account, so a
-    // non-team account (e.g. a personal Gmail) is correctly blocked. (The
-    // domain-qualified /a/macros/aisee.ai/ form would force the aisee account even
-    // when the visitor picked a different one — wrong for gating.)
-    var APP_URL = "https://script.google.com/macros/s/AKfycbwIsD74hfAbSS2JJtHLWp9eAeTg-Z1G3mtlovLTpwec1b4qkT3MuNe-p4bd14qQ8EiO/exec";
-    // Carry the chosen account's authuser (set by the switch flow) so the embed
-    // loads the account the user actually picked, not just authuser=0.
-    var au = new URLSearchParams(location.search).get("authuser");
-    var iframeSrc = APP_URL + (au ? ("?authuser=" + encodeURIComponent(au)) : "");
-    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(APP_URL + "?home=1");
+    // One deployment, two URL forms of it:
+    //  - EXEC_DOMAIN (/a/macros/aisee.ai/s/…): the IFRAME src. It FORCES the
+    //    visitor's aisee.ai account, so a team member whose *default* Google
+    //    login is a personal Gmail (authuser=0) still loads as their aisee
+    //    identity. The generic /macros/s/ form always loads authuser=0, so
+    //    multi-account members got an endless team-only ↔ account-chooser loop.
+    //    Gating is enforced by the ALLOW list in Code.gs regardless of which
+    //    account Google resolves, so forcing aisee.ai here is correct — and it
+    //    is the only form that breaks the loop.
+    //  - EXEC_GENERIC (/macros/s/…): used ONLY as the AccountChooser `continue`
+    //    target. The chooser prepends /a/<domain>/ itself, so a domain-qualified
+    //    continue would double the prefix and 404.
+    var DEPLOY_ID = "AKfycbwIsD74hfAbSS2JJtHLWp9eAeTg-Z1G3mtlovLTpwec1b4qkT3MuNe-p4bd14qQ8EiO";
+    var EXEC_DOMAIN  = "https://script.google.com/a/macros/aisee.ai/s/" + DEPLOY_ID + "/exec";
+    var EXEC_GENERIC = "https://script.google.com/macros/s/" + DEPLOY_ID + "/exec";
+    var iframeSrc = EXEC_DOMAIN;
+    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(EXEC_GENERIC + "?home=1");
     document.getElementById("switchLink").href = chooser;
 
     var overlay = document.getElementById("overlay");
