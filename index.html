@@ -18,110 +18,427 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://api.fontshare.com/v2/css?f[]=chillax@1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github.min.css">
   <style>
-    :root { --ink:#262238; --purple:#7A6BB5; --violet:#c4b5fd;
-      --sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-      --display:"Chillax","DM Sans",system-ui,sans-serif; }
+    :root {
+      --aisee-purple:#7A6BB5; --aisee-ink:#262238; --color-violet-300:#c4b5fd;
+      --color-bg:#FAFAFA; --color-surface:#F3F3F3; --color-border:#e6e6ea;
+      --color-fg:#262238; --color-fg-muted:rgba(38,34,56,.7); --color-primary:#7A6BB5;
+      --font-sans:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+      --font-display:"Chillax","DM Sans",system-ui,sans-serif;
+      --font-mono:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;
+      --side-w:300px; --bar-h:52px;
+    }
     * { box-sizing:border-box; }
-    html,body { height:100%; margin:0; }
-    body { font-family:var(--sans); background:var(--ink); color:#fff; display:flex; flex-direction:column; }
-    /* No wrapper chrome: the embedded portal renders the single app bar
-       (brand + nav + account menu), so this page is just the full-bleed frame. */
-    .frame-wrap { position:relative; flex:1; min-height:0; background:#FAFAFA; }
-    iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    html,body { height:100%; }
+    body { margin:0; background:var(--color-bg); color:var(--color-fg);
+      font-family:var(--font-sans); line-height:1.6; }
+    a { color:var(--color-primary); }
 
-    /* Branded overlay shown by default; removed only when the embedded app
-       signals it loaded. If the visitor is blocked (Google returns its generic
-       error in the iframe), no signal arrives and this stays — so they see our
-       UI with an account switcher, not Google's error. */
-    .overlay { position:absolute; inset:0; z-index:2; display:flex; align-items:center;
-      justify-content:center; text-align:center; padding:24px; background:var(--ink); }
-    .overlay.hidden { display:none; }
-    .overlay .card { max-width:480px; }
-    .overlay .brand { font-family:var(--display); text-transform:uppercase; letter-spacing:.06em;
-      font-size:.78rem; color:var(--violet); margin-bottom:12px; }
-    .overlay h1 { font-family:var(--display); font-weight:600; font-size:1.7rem; margin:0 0 12px; }
-    .overlay p { color:rgba(255,255,255,.8); line-height:1.6; margin:0 0 8px; }
+    /* Single app bar (the only header) */
+    .topbar { position:fixed; inset:0 0 auto 0; height:var(--bar-h); z-index:20;
+      background:var(--aisee-ink); color:#fff; display:flex; align-items:center;
+      gap:14px; padding:0 18px; }
+    .topbar .brand { font-family:var(--font-display); letter-spacing:.04em;
+      text-transform:uppercase; font-size:.76rem; color:var(--color-violet-300); }
+    .topbar .home { font-weight:600; color:#fff; cursor:pointer; }
+    .topbar .path { font-family:var(--font-mono); font-size:.78rem;
+      color:rgba(255,255,255,.6); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+    .menu-toggle { display:none; background:rgba(255,255,255,.12); color:#fff; border:0;
+      border-radius:8px; width:34px; height:34px; font-size:18px; cursor:pointer; }
+    .acct { position:relative; }
+    .avatar { width:32px; height:32px; border-radius:50%; border:0; cursor:pointer;
+      background:var(--color-primary); color:#fff; font-weight:600; font-size:.85rem;
+      display:flex; align-items:center; justify-content:center; text-transform:uppercase; }
+    .avatar:hover { filter:brightness(1.1); }
+    .acct-menu { position:absolute; top:42px; right:0; min-width:220px; background:#fff;
+      color:var(--color-fg); border:1px solid var(--color-border); border-radius:12px;
+      box-shadow:0 12px 32px rgba(38,34,56,.22); padding:12px; z-index:40; }
+    .acct-menu[hidden] { display:none; }
+    .acct-menu .email { font-size:.85rem; color:var(--color-fg); word-break:break-all; margin-bottom:10px; }
+    .acct-menu .label { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;
+      color:var(--color-fg-muted); margin-bottom:3px; }
+    .acct-menu button { display:block; width:100%; text-align:center; background:var(--color-surface);
+      color:var(--color-fg); border:0; text-decoration:none; font:inherit; font-weight:600; font-size:.85rem;
+      padding:9px 12px; border-radius:8px; cursor:pointer; margin-top:6px; }
+    .acct-menu button:hover { background:rgba(122,107,181,.14); }
+
+    .shell { display:flex; padding-top:var(--bar-h); min-height:100%; }
+    aside { width:var(--side-w); flex:0 0 var(--side-w); position:fixed; top:var(--bar-h);
+      bottom:0; left:0; overflow-y:auto; border-right:1px solid var(--color-border);
+      background:var(--color-surface); padding:14px 10px 40px; }
+    .filter { width:100%; height:32px; padding:0 12px; margin-bottom:12px;
+      border:1px solid var(--color-border); border-radius:999px; background:#fff;
+      color:var(--color-fg); font:inherit; font-size:14px; outline:none; }
+    .filter:focus { border-color:var(--color-primary); box-shadow:0 0 0 3px rgba(122,107,181,.22); }
+    .sec-title { font-family:var(--font-display); font-weight:600; font-size:.82rem;
+      text-transform:uppercase; letter-spacing:.04em; color:var(--color-fg-muted); padding:10px 10px 4px; }
+    .grp-title { font-weight:600; font-size:.85rem; cursor:pointer; padding:6px 10px;
+      border-radius:8px; display:flex; align-items:center; gap:6px; }
+    .grp-title:hover { background:rgba(122,107,181,.10); }
+    .grp-title .chev { transition:transform .15s; font-size:.7rem; opacity:.6; }
+    .nav-group.collapsed .chev { transform:rotate(-90deg); }
+    .nav-group.collapsed .grp-items { display:none; }
+    .grp-items { padding-left:8px; }
+    .nav-item { display:block; padding:5px 10px; border-radius:8px; color:var(--color-fg);
+      cursor:pointer; font-size:.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .nav-item:hover { background:rgba(122,107,181,.12); }
+    .nav-item.active { background:var(--color-primary); color:#fff; font-weight:600; }
+    .nav-item.disabled { color:var(--color-fg-muted); cursor:default; opacity:.6; }
+    .nav-item.disabled:hover { background:none; }
+    main { margin-left:var(--side-w); flex:1; min-width:0; max-width:920px; padding:30px 40px 100px; }
+    h1,h2,h3,h4 { font-family:var(--font-display); font-weight:600; line-height:1.25; scroll-margin-top:calc(var(--bar-h) + 12px); }
+    h1 { font-size:2rem; } h2 { font-size:1.5rem; margin-top:2em; border-bottom:1px solid var(--color-border); padding-bottom:.25em; }
+    h3 { font-size:1.2rem; margin-top:1.5em; }
+    code { font-family:var(--font-mono); font-size:.88em; background:var(--color-surface); padding:1px 6px; border-radius:6px; }
+    pre { background:#2622380d; border:1px solid var(--color-border); border-radius:12px; padding:16px; overflow:auto; }
+    pre code { background:none; padding:0; }
+    table { border-collapse:collapse; width:100%; margin:1em 0; font-size:.92rem; display:block; overflow-x:auto; }
+    th,td { border:1px solid var(--color-border); padding:7px 11px; text-align:left; vertical-align:top; }
+    th { background:var(--color-surface); }
+    blockquote { border-left:3px solid var(--color-violet-300); margin:1em 0; padding:2px 0 2px 16px; color:var(--color-fg-muted); }
+    img { max-width:100%; }
+    .err { color:#b00; font-family:var(--font-mono); }
+    .backdrop { display:none; }
+    @media (max-width:900px) {
+      .menu-toggle { display:inline-flex; align-items:center; justify-content:center; }
+      aside { transform:translateX(-100%); transition:transform .2s; z-index:30; box-shadow:0 12px 40px rgba(38,34,56,.25); }
+      body.nav-open aside { transform:translateX(0); }
+      main { margin-left:0; padding:24px 18px 80px; }
+      body.nav-open .backdrop { display:block; position:fixed; inset:var(--bar-h) 0 0 0; background:rgba(0,0,0,.3); z-index:25; }
+    }
+
+    /* Full-screen gate: sign-in / loading / error, before the app renders. */
+    .gate { position:fixed; inset:0; z-index:50; display:flex; align-items:center;
+      justify-content:center; text-align:center; padding:24px; background:var(--aisee-ink); color:#fff; }
+    .gate[hidden] { display:none; }
+    .gate .card { max-width:480px; }
+    .gate .brand { font-family:var(--font-display); text-transform:uppercase; letter-spacing:.06em;
+      font-size:.78rem; color:var(--color-violet-300); margin-bottom:12px; }
+    .gate h1 { font-family:var(--font-display); font-weight:600; font-size:1.7rem; margin:0 0 12px; color:#fff; }
+    .gate p { color:rgba(255,255,255,.8); line-height:1.6; margin:0 0 8px; }
     .spinner { width:26px; height:26px; margin:6px auto 16px; border:3px solid rgba(255,255,255,.25);
-      border-top-color:var(--violet); border-radius:50%; animation:spin .9s linear infinite; }
+      border-top-color:var(--color-violet-300); border-radius:50%; animation:spin .9s linear infinite; }
     @keyframes spin { to { transform:rotate(360deg); } }
-    .actions { margin-top:18px; display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
-    .btn { display:inline-block; text-decoration:none; font-weight:600; padding:11px 20px; border-radius:999px; }
-    .btn.primary { background:var(--purple); color:#fff; }
-    .btn.primary:hover { filter:brightness(1.08); }
-    .btn.ghost { background:rgba(255,255,255,.1); color:#fff; }
-    .btn.ghost:hover { background:rgba(255,255,255,.16); }
-    .reveal { opacity:0; transition:opacity .3s; }
-    .reveal.show { opacity:1; }
-    .hint { font-size:.8rem; color:rgba(255,255,255,.5); margin-top:16px; }
+    .gate .btn { display:inline-block; margin-top:18px; text-decoration:none; font-weight:600;
+      padding:12px 24px; border-radius:999px; background:var(--aisee-purple); color:#fff; border:0;
+      cursor:pointer; font:inherit; font-weight:600; }
+    .gate .btn:hover { filter:brightness(1.08); }
+    .app[hidden] { display:none; }
   </style>
 </head>
 <body>
-  <div class="frame-wrap">
-    <iframe id="docs" title="AiSee Glasses SDK Documentation"
-      referrerpolicy="no-referrer-when-downgrade" allow="clipboard-write"></iframe>
-
-    <div class="overlay" id="overlay">
-      <div class="card">
-        <div class="brand">AiSee Glasses</div>
-        <div id="loading">
-          <div class="spinner"></div>
-          <p>Loading the documentation…</p>
-        </div>
-        <div class="reveal" id="blocked">
-          <h1>This documentation is team-only</h1>
-          <p>Access is limited to the AiSee glasses team. Sign in with your
-             <strong>aisee.ai</strong> Google account to continue.</p>
-          <div class="actions">
-            <a class="btn primary" id="switchLink" href="#" target="_top">Choose a different Google account</a>
-          </div>
-        </div>
+  <!-- Pre-auth gate (loading / team-only / error) -->
+  <div class="gate" id="gate">
+    <div class="card">
+      <div class="brand">AiSee Glasses</div>
+      <div id="gateLoading">
+        <div class="spinner"></div>
+        <p>Loading the documentation…</p>
+      </div>
+      <div id="gateMsg" hidden>
+        <h1 id="gateTitle"></h1>
+        <p id="gateBody"></p>
+        <button class="btn" id="gateBtn" hidden></button>
       </div>
     </div>
   </div>
 
+  <!-- The app (single top bar + sidebar + content) -->
+  <div class="app" id="app" hidden>
+    <div class="topbar">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+      <span class="brand">AiSee Glasses</span>
+      <span class="home" id="home">Overview</span>
+      <span class="path" id="path"></span>
+      <div class="acct">
+        <button class="avatar" id="avatarBtn" title="">?</button>
+        <div class="acct-menu" id="acctMenu" hidden>
+          <div class="label">Signed in as</div>
+          <div class="email" id="acctEmail"></div>
+          <button id="switchBtn">Switch account</button>
+          <button id="signoutBtn">Sign out</button>
+        </div>
+      </div>
+    </div>
+    <div class="backdrop" id="backdrop"></div>
+    <div class="shell">
+      <aside id="sidebar">
+        <input class="filter" id="filter" type="search" placeholder="Filter pages…" aria-label="Filter pages">
+        <nav id="nav"></nav>
+      </aside>
+      <main><article id="content">Loading…</article></main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.0/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
   <script>
-    // One deployment, two URL forms of it:
-    //  - EXEC_DOMAIN (/a/macros/aisee.ai/s/…): the IFRAME src. It FORCES the
-    //    visitor's aisee.ai account, so a team member whose *default* Google
-    //    login is a personal Gmail (authuser=0) still loads as their aisee
-    //    identity. The generic /macros/s/ form always loads authuser=0, so
-    //    multi-account members got an endless team-only ↔ account-chooser loop.
-    //    Gating is enforced by the ALLOW list in Code.gs regardless of which
-    //    account Google resolves, so forcing aisee.ai here is correct — and it
-    //    is the only form that breaks the loop.
-    //  - EXEC_GENERIC (/macros/s/…): used ONLY as the AccountChooser `continue`
-    //    target. The chooser prepends /a/<domain>/ itself, so a domain-qualified
-    //    continue would double the prefix and 404.
+  (function () {
+    'use strict';
+
+    // ── Config ────────────────────────────────────────────────────
+    // The ONE Apps Script deployment id (the "Anyone + Google account"
+    // deployment) used as the IDENTITY BROKER, in domain-qualified form so
+    // it forces the visitor's aisee.ai account (works even when it's a
+    // secondary login).
     var DEPLOY_ID = "AKfycbwIsD74hfAbSS2JJtHLWp9eAeTg-Z1G3mtlovLTpwec1b4qkT3MuNe-p4bd14qQ8EiO";
-    var EXEC_DOMAIN  = "https://script.google.com/a/macros/aisee.ai/s/" + DEPLOY_ID + "/exec";
-    var EXEC_GENERIC = "https://script.google.com/macros/s/" + DEPLOY_ID + "/exec";
-    var iframeSrc = EXEC_DOMAIN;
-    var chooser = "https://accounts.google.com/AccountChooser?continue=" + encodeURIComponent(EXEC_GENERIC + "?home=1");
-    document.getElementById("switchLink").href = chooser;
+    var BROKER_EXEC = "https://script.google.com/a/macros/aisee.ai/s/" + DEPLOY_ID + "/exec";
 
-    var overlay = document.getElementById("overlay");
-    var loaded = false;
+    // The token-gated content API — a SEPARATE deployment whose access is
+    // "Anyone, even anonymous", so this static page can fetch() it with no
+    // Google cookies (works in incognito). PASTE its /exec URL here after you
+    // create that deployment (see appscript/README.md).
+    var API_EXEC = "PASTE_ANONYMOUS_API_EXEC_URL_HERE";
 
-    // The embedded app (Portal/Denied) posts this when it renders.
-    window.addEventListener("message", function (e) {
-      if (e.data === "aisee-docs-ready" && /google/.test(e.origin || "")) {
-        loaded = true;
-        overlay.classList.add("hidden");
+    var RETURN_URL = location.origin + "/";
+    var SESSION_KEY = "aisee-docs-session-v1";
+    var NONCE_KEY = "aisee-docs-nonce-v1";
+
+    // ── Gate helpers ──────────────────────────────────────────────
+    var gate = document.getElementById("gate");
+    var gateLoading = document.getElementById("gateLoading");
+    var gateMsg = document.getElementById("gateMsg");
+    var gateBtn = document.getElementById("gateBtn");
+    function showLoading() {
+      gate.hidden = false; gateLoading.hidden = false; gateMsg.hidden = true;
+      document.getElementById("app").hidden = true;
+    }
+    function showMessage(title, body, btnLabel, onClick) {
+      gate.hidden = false; gateLoading.hidden = true; gateMsg.hidden = false;
+      document.getElementById("app").hidden = true;
+      document.getElementById("gateTitle").textContent = title;
+      document.getElementById("gateBody").innerHTML = body || "";
+      if (btnLabel) {
+        gateBtn.hidden = false; gateBtn.textContent = btnLabel;
+        gateBtn.onclick = onClick;
+      } else { gateBtn.hidden = true; }
+    }
+
+    // ── Session ───────────────────────────────────────────────────
+    function loadSession() {
+      try {
+        var s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null");
+        if (s && s.token && s.exp && Date.now() < s.exp) return s;
+      } catch (e) {}
+      return null;
+    }
+    function saveSession(s) {
+      try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(s)); } catch (e) {}
+    }
+    function clearSession() {
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+    }
+    // Decode "email|exp" out of the token payload (first dot-segment, base64url).
+    function decodeToken(t) {
+      try {
+        var b = t.split(".")[0].replace(/-/g, "+").replace(/_/g, "/");
+        var seg = decodeURIComponent(escape(atob(b))).split("|");
+        return { email: seg[0], exp: Number(seg[1]) };
+      } catch (e) { return null; }
+    }
+    function randNonce() {
+      try {
+        var buf = new Uint8Array(16); crypto.getRandomValues(buf);
+        return Array.prototype.map.call(buf, function (b) { return ("0" + b.toString(16)).slice(-2); }).join("");
+      } catch (e) { return Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2); }
+    }
+
+    // ── Login round-trip ──────────────────────────────────────────
+    function startLogin() {
+      var nonce = randNonce();
+      try { localStorage.setItem(NONCE_KEY, nonce); }
+      catch (e) {
+        showMessage("Storage blocked",
+          "Sign-in needs site storage. Please try again in a regular (non-private) window, " +
+          "or allow cookies/site data for this page.", null, null);
+        return;
       }
-    });
+      showLoading();
+      location.assign(BROKER_EXEC + "?return=" + encodeURIComponent(RETURN_URL) +
+        "&nonce=" + encodeURIComponent(nonce));
+    }
 
-    // If no "ready" signal soon, the visitor is blocked by Google → swap the
-    // spinner for our team-only / switch-account UI (overlay already covers the
-    // iframe's generic error).
-    setTimeout(function () {
-      if (loaded) return;
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("blocked").classList.add("show");
-    }, 4000);
+    // Handle a broker callback (#token=…&nonce=…). Returns a session or null.
+    function consumeCallback() {
+      var h = location.hash.replace(/^#/, "");
+      if (!h || h.indexOf("token=") === -1) return null;
+      var params = {};
+      h.split("&").forEach(function (kv) {
+        var i = kv.indexOf("="); if (i < 0) return;
+        params[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1));
+      });
+      // Strip the hash so the token isn't left in the URL / history.
+      history.replaceState(null, "", location.pathname + location.search);
+      var expected = "";
+      try { expected = localStorage.getItem(NONCE_KEY) || ""; } catch (e) {}
+      try { localStorage.removeItem(NONCE_KEY); } catch (e) {}
+      if (!params.token || !params.nonce || params.nonce !== expected) {
+        return { error: "nonce" };
+      }
+      var info = decodeToken(params.token);
+      if (!info || !info.exp) return { error: "token" };
+      return { token: params.token, email: info.email, exp: info.exp };
+    }
 
-    // Load the embed last.
-    document.getElementById("docs").src = iframeSrc;
+    // ── Content API ───────────────────────────────────────────────
+    var session = null;
+    function api(fn, extra) {
+      if (API_EXEC.indexOf("PASTE_") === 0) {
+        return Promise.reject(new Error("Content API URL not configured yet."));
+      }
+      var url = API_EXEC + "?api=" + encodeURIComponent(fn) +
+        "&token=" + encodeURIComponent(session.token) + (extra || "");
+      return fetch(url).then(function (r) { return r.json(); }).then(function (j) {
+        if (!j.ok) {
+          var e = new Error(j.error || "request failed");
+          e.code = j.error; throw e;
+        }
+        return j;
+      });
+    }
+
+    // ── Portal viewer (ported from the Apps Script Portal) ─────────
+    function dirOf(p) { var i = p.lastIndexOf("/"); return i < 0 ? "" : p.slice(0, i); }
+    function resolvePath(baseDir, rel) {
+      var u = new URL(rel, "http://h/" + (baseDir ? baseDir + "/" : ""));
+      return u.pathname.replace(/^\//, "");
+    }
+    function slug(s) { return s.toLowerCase().trim().replace(/[^\w]+/g, "-").replace(/^-+|-+$/g, ""); }
+
+    var navData = [], current = "README.md";
+
+    function renderItem(it) {
+      if (it.group) {
+        var g = document.createElement("div"); g.className = "nav-group collapsed";
+        var gt = document.createElement("div"); gt.className = "grp-title";
+        gt.innerHTML = '<span class="chev">▾</span><span></span>'; gt.lastChild.textContent = it.group;
+        var wrap = document.createElement("div"); wrap.className = "grp-items";
+        it.items.forEach(function (c) { wrap.appendChild(renderItem(c)); });
+        gt.addEventListener("click", function () { g.classList.toggle("collapsed"); });
+        g.appendChild(gt); g.appendChild(wrap); return g;
+      }
+      var a = document.createElement("div"); a.className = "nav-item"; a.textContent = it.title;
+      if (it.doc) { a.dataset.doc = it.doc; a.addEventListener("click", function () { setDoc(it.doc); }); }
+      else { a.classList.add("disabled"); a.title = "Interactive DocC site — available in the full/local build"; }
+      return a;
+    }
+    function buildNav() {
+      var root = document.getElementById("nav"); root.innerHTML = "";
+      navData.forEach(function (sec) {
+        var t = document.createElement("div"); t.className = "sec-title"; t.textContent = sec.section;
+        root.appendChild(t);
+        sec.items.forEach(function (it) { root.appendChild(renderItem(it)); });
+      });
+    }
+    function syncActive() {
+      document.querySelectorAll("#nav .nav-item").forEach(function (a) {
+        var on = a.dataset.doc === current; a.classList.toggle("active", on);
+        if (on) { var g = a.closest(".nav-group"); if (g) g.classList.remove("collapsed"); }
+      });
+    }
+    function filterNav(q) {
+      q = q.trim().toLowerCase();
+      document.querySelectorAll("#nav .nav-item").forEach(function (a) {
+        a.style.display = (!q || a.textContent.toLowerCase().indexOf(q) !== -1) ? "" : "none";
+      });
+      document.querySelectorAll("#nav .nav-group").forEach(function (g) {
+        var any = [].some.call(g.querySelectorAll(".nav-item"), function (a) { return a.style.display !== "none"; });
+        g.style.display = any ? "" : "none"; if (q && any) g.classList.remove("collapsed");
+      });
+    }
+
+    function setDoc(path) {
+      current = path;
+      document.getElementById("path").textContent = path;
+      document.body.classList.remove("nav-open");
+      var el = document.getElementById("content"); el.textContent = "Loading…";
+      api("doc", "&path=" + encodeURIComponent(path)).then(function (j) {
+        var text = j.doc;
+        var baseDir = dirOf(path);
+        marked.setOptions({ gfm: true, breaks: false });
+        el.innerHTML = marked.parse(text);
+        el.querySelectorAll("h1,h2,h3,h4").forEach(function (h) { if (!h.id) h.id = slug(h.textContent); });
+        el.querySelectorAll("a[href]").forEach(function (a) {
+          var href = a.getAttribute("href"); if (!href) return;
+          if (/^(https?:|mailto:)/i.test(href)) { a.target = "_blank"; a.rel = "noopener"; return; }
+          if (href.charAt(0) === "#") return;
+          var parts = href.split("#"), resolved = resolvePath(baseDir, parts[0]);
+          if (/\.md$/i.test(resolved)) {
+            a.dataset.doc = resolved; a.removeAttribute("href"); a.style.cursor = "pointer";
+            a.addEventListener("click", function () { setDoc(resolved); });
+          } else { a.removeAttribute("href"); a.classList.add("disabled-link"); a.title = "Not available in this portal"; }
+        });
+        el.querySelectorAll("pre code").forEach(function (b) { try { hljs.highlightElement(b); } catch (e) {} });
+        window.scrollTo(0, 0); syncActive();
+      }).catch(function (e) {
+        if (e.code === "unauthorized") { clearSession(); startLogin(); return; }
+        el.innerHTML = '<p class="err">Could not load <b>' + path + "</b>: " + (e && e.message || e) + "</p>";
+      });
+    }
+
+    function wireApp() {
+      document.getElementById("filter").addEventListener("input", function (e) { filterNav(e.target.value); });
+      document.getElementById("menuToggle").addEventListener("click", function () { document.body.classList.toggle("nav-open"); });
+      document.getElementById("backdrop").addEventListener("click", function () { document.body.classList.remove("nav-open"); });
+      document.getElementById("home").addEventListener("click", function () { setDoc("README.md"); });
+
+      var avatarBtn = document.getElementById("avatarBtn");
+      var acctMenu = document.getElementById("acctMenu");
+      avatarBtn.textContent = (session.email || "?").charAt(0).toUpperCase();
+      avatarBtn.title = session.email || "";
+      document.getElementById("acctEmail").textContent = session.email || "";
+      avatarBtn.addEventListener("click", function (ev) { ev.stopPropagation(); acctMenu.hidden = !acctMenu.hidden; });
+      document.addEventListener("click", function (ev) {
+        if (!acctMenu.hidden && !acctMenu.contains(ev.target) && ev.target !== avatarBtn) acctMenu.hidden = true;
+      });
+      document.getElementById("switchBtn").addEventListener("click", function () { clearSession(); startLogin(); });
+      document.getElementById("signoutBtn").addEventListener("click", function () {
+        clearSession();
+        showMessage("Signed out", "You have been signed out of the documentation.",
+          "Sign in again", startLogin);
+      });
+    }
+
+    function initApp() {
+      gate.hidden = true;
+      document.getElementById("app").hidden = false;
+      wireApp();
+      api("nav").then(function (j) {
+        navData = JSON.parse(j.nav); buildNav(); setDoc("README.md");
+      }).catch(function (e) {
+        if (e.code === "unauthorized") { clearSession(); startLogin(); return; }
+        document.getElementById("content").innerHTML =
+          '<p class="err">Could not load navigation: ' + (e && e.message || e) + "</p>";
+        gate.hidden = true;
+      });
+    }
+
+    // ── Boot ──────────────────────────────────────────────────────
+    function boot() {
+      var cb = consumeCallback();
+      if (cb) {
+        if (cb.error === "nonce") {
+          showMessage("Sign-in could not be verified",
+            "The sign-in response didn’t match this browser session. Please try again.",
+            "Try again", startLogin);
+          return;
+        }
+        if (cb.error === "token") {
+          showMessage("Sign-in failed",
+            "The sign-in response was invalid. Please try again.", "Try again", startLogin);
+          return;
+        }
+        session = cb; saveSession(session); initApp(); return;
+      }
+      session = loadSession();
+      if (session) { initApp(); return; }
+      // No session and no callback → start the broker round trip.
+      startLogin();
+    }
+
+    boot();
+  })();
   </script>
 </body>
 </html>
