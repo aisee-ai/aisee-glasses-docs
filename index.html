@@ -195,12 +195,15 @@
     'use strict';
 
     // ── Config ────────────────────────────────────────────────────
-    // The ONE Apps Script deployment id (the "Anyone + Google account"
-    // deployment) used as the IDENTITY BROKER, in domain-qualified form so
-    // it forces the visitor's aisee.ai account (works even when it's a
-    // secondary login).
+    // The Apps Script deployment id used as the IDENTITY BROKER, in GENERIC
+    // form (runs as the visitor's active Google account). This is a TOP-LEVEL
+    // navigation, not an iframe, so there's no authuser=0 loop: if the active
+    // account isn't a team member, the broker shows a "Choose a different
+    // Google account" switcher. Generic (not domain-qualified /a/macros/aisee.ai/)
+    // so members on BOTH aisee.ai and ahlab.org (same Workspace) resolve — a
+    // domain-qualified URL would route only to aisee.ai and exclude ahlab.org.
     var DEPLOY_ID = "AKfycbwIsD74hfAbSS2JJtHLWp9eAeTg-Z1G3mtlovLTpwec1b4qkT3MuNe-p4bd14qQ8EiO";
-    var BROKER_EXEC = "https://script.google.com/a/macros/aisee.ai/s/" + DEPLOY_ID + "/exec";
+    var BROKER_EXEC = "https://script.google.com/macros/s/" + DEPLOY_ID + "/exec";
 
     // The token-gated content API — a SEPARATE deployment whose access is
     // "Anyone, even anonymous", so this static page can fetch() it with no
